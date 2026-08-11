@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glow — just us two</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#150C2E">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Glow">
+</head>
+<body>
+
+<div class="fireflies" id="fireflies" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<main class="phone">
+
+  <section class="setup" id="setupScreen">
+    <div class="setup-orb">🌙</div>
+    <h1 class="setup-title">Glow</h1>
+    <p class="setup-sub">a little room just for you two</p>
+
+    <div id="setupMissingConfig" class="setup-warning" hidden>
+      <p><strong>One-time setup needed.</strong> This app needs a free Firebase Realtime Database to send messages live between two devices. Open <code>script.js</code> and paste your config into <code>FIREBASE_CONFIG</code> at the top of the file.</p>
+    </div>
+
+    <div class="pair-buttons" id="pairButtons"></div>
+    <p class="setup-hint">Tap your name once. Next time, open your personal link and it'll skip straight to the chat.</p>
+  </section>
+
+  <div id="appScreen" hidden>
+    <header class="topbar">
+      <div class="orb-wrap">
+        <div class="orb" id="orb">
+          <span class="orb-face" id="orbFace">☺</span>
+          <span class="weather-badge" id="weatherBadge">⛅</span>
+        </div>
+        <div class="orb-bubble" id="orbBubble">hi, I'm Ember~ I feel the mood of your chat</div>
+      </div>
+      <div class="title-block">
+        <h1 id="roomTitle">Glow</h1>
+        <p class="subtitle" id="presenceLine">connecting...</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="rinduChip" type="button" title="Jarak rindu">🌱</button>
+        <button class="icon-btn" id="shareBtn" type="button" title="Copy invite link">🔗</button>
+      </div>
+      <div class="love-meter" title="Closeness meter">
+        <div class="love-meter-fill" id="loveFill"></div>
+      </div>
+    </header>
+
+    <section class="chat" id="chat" aria-live="polite"></section>
+
+    <div class="typing-row" id="typingRow" hidden>
+      <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+      <span class="typing-label" id="typingLabel">typing...</span>
+    </div>
+
+    <form class="composer" id="composer">
+      <button type="button" class="round-btn" id="attachBtn" aria-label="More">＋</button>
+      <input type="text" id="msgInput" placeholder="Say something to them..." autocomplete="off" maxlength="500">
+      <button type="button" class="round-btn mic-btn" id="micBtn" aria-label="Record voice note">🎤</button>
+      <button type="submit" id="sendBtn" class="round-btn send-btn" aria-label="Send" hidden>➤</button>
+    </form>
+  </div>
+
+  <!-- ===== Attach sheet ===== -->
+  <div class="sheet-backdrop" id="attachBackdrop" hidden>
+    <div class="sheet" id="attachSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-grid">
+        <button type="button" class="sheet-item" id="btnPhoto"><span>📷</span>Foto</button>
+        <button type="button" class="sheet-item" id="btnVideo"><span>🎥</span>Video</button>
+        <button type="button" class="sheet-item" id="btnGombal"><span>🎲</span>Cheesy line</button>
+        <button type="button" class="sheet-item hug-btn" id="btnHug"><span>🤗</span>Hold to hug<span class="hug-ring" id="hugRing"></span></button>
+        <button type="button" class="sheet-item" id="btnCapsule"><span>💌</span>Time capsule</button>
+        <button type="button" class="sheet-item" id="btnDoodle"><span>🎨</span>Doodle bareng</button>
+        <button type="button" class="sheet-item" id="btnMikirin"><span>💭</span>Baru mikirin kamu</button>
+        <button type="button" class="sheet-item" id="btnPlaylist"><span>🎵</span>Playlist hari ini</button>
+      </div>
+      <button type="button" class="sheet-close" id="attachClose">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ===== Time capsule panel ===== -->
+  <div class="sheet-backdrop" id="capsuleBackdrop" hidden>
+    <div class="sheet" id="capsulePanel">
+      <div class="sheet-handle"></div>
+      <p class="capsule-title">Bury a message to open later</p>
+      <textarea id="capsuleText" rows="2" placeholder="Write something for the future..."></textarea>
+      <div class="capsule-row">
+        <select id="capsuleDelay">
+          <option value="10000">10 seconds</option>
+          <option value="30000">30 seconds</option>
+          <option value="60000">1 minute</option>
+        </select>
+        <button id="capsuleSend" type="button">Bury message</button>
+        <button id="capsuleCancel" type="button" class="ghost">Cancel</button>
+      </div>
+      <p class="capsule-hint">*demo timing sped up — keep this tab open so it can deliver on time</p>
+    </div>
+  </div>
+
+  <!-- ===== Jarak rindu modal ===== -->
+  <div class="sheet-backdrop" id="rinduBackdrop" hidden>
+    <div class="sheet" id="rinduModal">
+      <div class="sheet-handle"></div>
+      <div class="rindu-plant" id="rinduPlantEmoji">🌱</div>
+      <p class="rindu-label" id="rinduLabel">mulai kangen nih</p>
+      <p class="rindu-sub" id="rinduSub">terakhir kontak dari dia: -</p>
+      <button type="button" class="sheet-item-wide" id="rinduHugBtn">🤗 Kirim hug sekarang</button>
+      <button type="button" class="sheet-close" id="rinduClose">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ===== Playlist modal ===== -->
+  <div class="sheet-backdrop" id="playlistBackdrop" hidden>
+    <div class="sheet" id="playlistModal">
+      <div class="sheet-handle"></div>
+      <p class="capsule-title">Playlist percakapan hari ini</p>
+      <p class="rindu-sub" id="playlistMoodLine">mood dominan: -</p>
+      <div id="playlistList" class="playlist-list"></div>
+      <button type="button" class="sheet-close" id="playlistClose">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ===== Doodle modal ===== -->
+  <div class="sheet-backdrop" id="doodleBackdrop" hidden>
+    <div class="sheet" id="doodleModal">
+      <div class="sheet-handle"></div>
+      <p class="capsule-title">Coret-coret bareng, real-time ✏️</p>
+      <canvas id="doodleCanvas" width="300" height="300"></canvas>
+      <div class="doodle-colors" id="doodleColors">
+        <button type="button" class="swatch" style="background:#FF87AB" data-color="#FF87AB"></button>
+        <button type="button" class="swatch" style="background:#FFC96B" data-color="#FFC96B"></button>
+        <button type="button" class="swatch" style="background:#8CE0C9" data-color="#8CE0C9"></button>
+        <button type="button" class="swatch" style="background:#B7ACD9" data-color="#B7ACD9"></button>
+        <button type="button" class="swatch" style="background:#F5EFFF" data-color="#F5EFFF"></button>
+      </div>
+      <div class="capsule-row">
+        <button type="button" id="doodleClear" class="ghost-solid">Bersihkan</button>
+        <button type="button" id="doodleClose2" class="ghost">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Argument cooldown overlay ===== -->
+  <div class="cooldown-overlay" id="cooldownOverlay" hidden>
+    <div class="cooldown-card">
+      <div class="cooldown-emoji">🕊️</div>
+      <p class="cooldown-title">Ambil napas dulu, yuk</p>
+      <p class="cooldown-sub">Obrolan kelihatan mulai memanas. Kasih jeda sebentar sebelum lanjut ngobrol lagi.</p>
+      <p class="cooldown-time" id="cooldownTimer">03:00</p>
+      <button type="button" id="cooldownSkip" class="sheet-item-wide" disabled>Lanjutkan ngobrol</button>
+    </div>
+  </div>
+
+  <input type="file" id="photoInput" accept="image/*" hidden>
+  <input type="file" id="videoInput" accept="video/*" hidden>
+
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
